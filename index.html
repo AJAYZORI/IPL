@@ -2,39 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>IPL 2026 Tracker & Ledger</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        body { background-color: #f4f7f6; color: #333; padding-bottom: 50px; }
-        header { background-color: #1a237e; color: white; padding: 15px; text-align: center; }
-        .controls { margin-top: 10px; }
-        select { padding: 8px; font-size: 16px; border-radius: 5px; font-weight: bold; width: 90%; max-width: 300px; }
+        body { background-color: #f4f7f6; color: #333; padding-bottom: 80px; } 
+        header { background-color: #1a237e; color: white; padding: 15px 10px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+        header h2 { font-size: 22px; margin-bottom: 10px;}
+        .controls { width: 100%; }
+        select { padding: 12px; font-size: 16px; border-radius: 8px; font-weight: bold; width: 100%; max-width: 400px; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); outline: none; }
         
-        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        .container { max-width: 600px; margin: 15px auto; padding: 0 10px; }
         
-        /* Vertical Match Cards */
-        .match-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #ffab00; }
-        .match-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; color: #1a237e; border-bottom: 1px solid #eee; padding-bottom: 5px;}
-        .match-teams { font-size: 18px; margin-bottom: 10px; }
+        .match-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border-left: 6px solid #ffab00; }
+        .match-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 12px; color: #1a237e; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 15px;}
+        .match-teams { font-size: 18px; margin-bottom: 15px; font-weight: bold; color: #222;}
         
-        /* Inputs for +/- */
-        .input-group { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
-        .input-group label { width: 60px; font-weight: bold; font-size: 14px;}
-        input[type="number"], input[type="text"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; }
+        .input-group { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+        .input-group label { width: 70px; font-weight: bold; font-size: 15px; color: #555;}
+        input[type="number"], input[type="text"] { padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; flex-grow: 1; font-size: 16px; background-color: #fcfcfc;}
+        input:focus { border-color: #1a237e; outline: none; background-color: #fff;}
+
+        .ledger-section { background: #e8eaf6; padding: 15px; border-radius: 10px; margin-top: 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border: 1px solid #c5cae9; }
+        .ledger-section h3 { color: #1a237e; margin-bottom: 8px; font-size: 18px;}
+        textarea { width: 100%; height: 120px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; resize: vertical; margin-bottom: 5px; font-size: 16px; font-family: inherit;}
         
-        /* Ledger Section */
-        .ledger-section { background: #e8eaf6; padding: 15px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid #c5cae9; }
-        .ledger-section h3 { color: #1a237e; margin-bottom: 10px; }
-        textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; margin-bottom: 10px; }
+        .save-btn-container { position: fixed; bottom: 15px; left: 0; width: 100%; padding: 0 15px; z-index: 50; display: flex; justify-content: center;}
+        button { background-color: #ffab00; color: #000; border: none; padding: 15px 20px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; max-width: 600px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: background-color 0.2s;}
+        button:active { background-color: #ff8f00; transform: translateY(2px); }
         
-        button { background-color: #ffab00; color: #000; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-top: 10px;}
-        button:hover { background-color: #ff8f00; }
-        
-        .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 2px; padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px; transform: translateX(-50%); }
-        .toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 200; left: 50%; bottom: 80px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.3);}
+        .toast.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2.5s; }
+        @keyframes fadein { from {bottom: 50px; opacity: 0;} to {bottom: 80px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 80px; opacity: 1;} to {bottom: 50px; opacity: 0;} }
     </style>
 </head>
 <body>
@@ -50,38 +50,128 @@
         <div id="matches-container"></div>
 
         <div class="ledger-section">
-            <h3>📝 Week-wise Ledger (Kisko Kitna Dena Hai)</h3>
-            <p style="font-size: 13px; color: #555; margin-bottom: 8px;">Write down final settlement details for this week (e.g., A owes B ₹500)</p>
-            <textarea id="week-ledger" placeholder="Enter settlement details here..."></textarea>
+            <h3>📝 Final Settlement (Ledger)</h3>
+            <p style="font-size: 13px; color: #555; margin-bottom: 10px;">Weekly settlement: Kisko kitna dena hai</p>
+            <textarea id="week-ledger" placeholder="E.g., Ajay ko 500 dena hai..."></textarea>
         </div>
+    </div>
 
+    <div class="save-btn-container">
         <button onclick="saveData()">💾 Save All Updates</button>
     </div>
 
-    <div id="toast" class="toast">Data Saved Successfully!</div>
+    <div id="toast" class="toast">✅ Data Saved Successfully!</div>
 
     <script>
-        // Default Template if no data exists in local storage
         const defaultSchedule = [
             {
-                "week": "Week 1 (Mar 28 – Apr 4)",
-                "ledger": "",
+                "week": "Week 1 (Mar 28 – Apr 4)", "ledger": "",
                 "matches": [
-                    { "id": "w1m1", "day": "Sat (Mar 28)", "teams": "RCB vs SRH", "plus": "", "minus": "" },
-                    { "id": "w1m2", "day": "Sun (Mar 29)", "teams": "MI vs KKR", "plus": "", "minus": "" },
-                    { "id": "w1m3", "day": "Mon (Mar 30)", "teams": "RR vs CSK", "plus": "", "minus": "" },
-                    { "id": "w1m4", "day": "Tue (Mar 31)", "teams": "PBKS vs GT", "plus": "", "minus": "" },
-                    { "id": "w1m5", "day": "Wed (Apr 1)", "teams": "LSG vs DC", "plus": "", "minus": "" }
+                    { "id": "w1m1", "day": "Sat", "teams": "RCB vs SRH", "plus": "", "minus": "" },
+                    { "id": "w1m2", "day": "Sun", "teams": "MI vs KKR", "plus": "", "minus": "" },
+                    { "id": "w1m3", "day": "Mon", "teams": "RR vs CSK", "plus": "", "minus": "" },
+                    { "id": "w1m4", "day": "Tue", "teams": "PBKS vs GT", "plus": "", "minus": "" },
+                    { "id": "w1m5", "day": "Wed", "teams": "LSG vs DC", "plus": "", "minus": "" },
+                    { "id": "w1m6", "day": "Thu", "teams": "KKR vs SRH", "plus": "", "minus": "" },
+                    { "id": "w1m7", "day": "Fri", "teams": "CSK vs PBKS", "plus": "", "minus": "" },
+                    { "id": "w1m8", "day": "Sat", "teams": "DC vs MI", "plus": "", "minus": "" },
+                    { "id": "w1m9", "day": "Sat", "teams": "GT vs RR", "plus": "", "minus": "" }
                 ]
             },
             {
-                "week": "Week 2 (Apr 5 – Apr 11)",
-                "ledger": "",
+                "week": "Week 2 (Apr 5 – Apr 11)", "ledger": "",
                 "matches": [
                     { "id": "w2m1", "day": "Sun", "teams": "SRH vs LSG", "plus": "", "minus": "" },
                     { "id": "w2m2", "day": "Sun", "teams": "RCB vs CSK", "plus": "", "minus": "" },
                     { "id": "w2m3", "day": "Mon", "teams": "KKR vs PBKS", "plus": "", "minus": "" },
-                    { "id": "w2m4", "day": "Tue", "teams": "RR vs MI", "plus": "", "minus": "" }
+                    { "id": "w2m4", "day": "Tue", "teams": "RR vs MI", "plus": "", "minus": "" },
+                    { "id": "w2m5", "day": "Wed", "teams": "DC vs GT", "plus": "", "minus": "" },
+                    { "id": "w2m6", "day": "Thu", "teams": "KKR vs LSG", "plus": "", "minus": "" },
+                    { "id": "w2m7", "day": "Fri", "teams": "RR vs RCB", "plus": "", "minus": "" },
+                    { "id": "w2m8", "day": "Sat", "teams": "PBKS vs SRH", "plus": "", "minus": "" },
+                    { "id": "w2m9", "day": "Sat", "teams": "CSK vs DC", "plus": "", "minus": "" }
+                ]
+            },
+            {
+                "week": "Week 3 (Apr 12 – Apr 18)", "ledger": "",
+                "matches": [
+                    { "id": "w3m1", "day": "Sun", "teams": "LSG vs GT", "plus": "", "minus": "" },
+                    { "id": "w3m2", "day": "Sun", "teams": "MI vs RCB", "plus": "", "minus": "" },
+                    { "id": "w3m3", "day": "Mon", "teams": "SRH vs RR", "plus": "", "minus": "" },
+                    { "id": "w3m4", "day": "Tue", "teams": "CSK vs KKR", "plus": "", "minus": "" },
+                    { "id": "w3m5", "day": "Wed", "teams": "RCB vs LSG", "plus": "", "minus": "" },
+                    { "id": "w3m6", "day": "Thu", "teams": "MI vs PBKS", "plus": "", "minus": "" },
+                    { "id": "w3m7", "day": "Fri", "teams": "GT vs KKR", "plus": "", "minus": "" },
+                    { "id": "w3m8", "day": "Sat", "teams": "RCB vs DC", "plus": "", "minus": "" },
+                    { "id": "w3m9", "day": "Sat", "teams": "SRH vs CSK", "plus": "", "minus": "" }
+                ]
+            },
+            {
+                "week": "Week 4 (Apr 19 – Apr 25)", "ledger": "",
+                "matches": [
+                    { "id": "w4m1", "day": "Sun", "teams": "KKR vs RR", "plus": "", "minus": "" },
+                    { "id": "w4m2", "day": "Sun", "teams": "PBKS vs LSG", "plus": "", "minus": "" },
+                    { "id": "w4m3", "day": "Mon", "teams": "GT vs MI", "plus": "", "minus": "" },
+                    { "id": "w4m4", "day": "Tue", "teams": "SRH vs DC", "plus": "", "minus": "" },
+                    { "id": "w4m5", "day": "Wed", "teams": "LSG vs RR", "plus": "", "minus": "" },
+                    { "id": "w4m6", "day": "Thu", "teams": "MI vs CSK", "plus": "", "minus": "" },
+                    { "id": "w4m7", "day": "Fri", "teams": "RCB vs GT", "plus": "", "minus": "" },
+                    { "id": "w4m8", "day": "Sat", "teams": "DC vs PBKS", "plus": "", "minus": "" },
+                    { "id": "w4m9", "day": "Sat", "teams": "RR vs SRH", "plus": "", "minus": "" }
+                ]
+            },
+            {
+                "week": "Week 5 (Apr 26 – May 2)", "ledger": "",
+                "matches": [
+                    { "id": "w5m1", "day": "Sun", "teams": "GT vs CSK", "plus": "", "minus": "" },
+                    { "id": "w5m2", "day": "Sun", "teams": "LSG vs KKR", "plus": "", "minus": "" },
+                    { "id": "w5m3", "day": "Mon", "teams": "DC vs RCB", "plus": "", "minus": "" },
+                    { "id": "w5m4", "day": "Tue", "teams": "PBKS vs RR", "plus": "", "minus": "" },
+                    { "id": "w5m5", "day": "Wed", "teams": "MI vs SRH", "plus": "", "minus": "" },
+                    { "id": "w5m6", "day": "Thu", "teams": "GT vs RCB", "plus": "", "minus": "" },
+                    { "id": "w5m7", "day": "Fri", "teams": "RR vs DC", "plus": "", "minus": "" },
+                    { "id": "w5m8", "day": "Sat", "teams": "CSK vs MI", "plus": "", "minus": "" }
+                ]
+            },
+            {
+                "week": "Week 6 (May 3 – May 9)", "ledger": "",
+                "matches": [
+                    { "id": "w6m1", "day": "Sun", "teams": "SRH vs KKR", "plus": "", "minus": "" },
+                    { "id": "w6m2", "day": "Sun", "teams": "GT vs PBKS", "plus": "", "minus": "" },
+                    { "id": "w6m3", "day": "Mon", "teams": "MI vs LSG", "plus": "", "minus": "" },
+                    { "id": "w6m4", "day": "Tue", "teams": "DC vs CSK", "plus": "", "minus": "" },
+                    { "id": "w6m5", "day": "Wed", "teams": "SRH vs PBKS", "plus": "", "minus": "" },
+                    { "id": "w6m6", "day": "Thu", "teams": "LSG vs RCB", "plus": "", "minus": "" },
+                    { "id": "w6m7", "day": "Fri", "teams": "DC vs KKR", "plus": "", "minus": "" },
+                    { "id": "w6m8", "day": "Sat", "teams": "RR vs GT", "plus": "", "minus": "" }
+                ]
+            },
+            {
+                "week": "Week 7 (May 10 – May 16)", "ledger": "",
+                "matches": [
+                    { "id": "w7m1", "day": "Sun", "teams": "CSK vs LSG", "plus": "", "minus": "" },
+                    { "id": "w7m2", "day": "Sun", "teams": "RCB vs MI", "plus": "", "minus": "" },
+                    { "id": "w7m3", "day": "Mon", "teams": "PBKS vs DC", "plus": "", "minus": "" },
+                    { "id": "w7m4", "day": "Tue", "teams": "GT vs SRH", "plus": "", "minus": "" },
+                    { "id": "w7m5", "day": "Wed", "teams": "RCB vs KKR", "plus": "", "minus": "" },
+                    { "id": "w7m6", "day": "Thu", "teams": "PBKS vs MI", "plus": "", "minus": "" },
+                    { "id": "w7m7", "day": "Fri", "teams": "LSG vs CSK", "plus": "", "minus": "" },
+                    { "id": "w7m8", "day": "Sat", "teams": "KKR vs GT", "plus": "", "minus": "" }
+                ]
+            },
+            {
+                "week": "Week 8 (May 17 – May 24)", "ledger": "",
+                "matches": [
+                    { "id": "w8m1", "day": "Sun", "teams": "PBKS vs RCB", "plus": "", "minus": "" },
+                    { "id": "w8m2", "day": "Sun", "teams": "DC vs RR", "plus": "", "minus": "" },
+                    { "id": "w8m3", "day": "Mon", "teams": "CSK vs SRH", "plus": "", "minus": "" },
+                    { "id": "w8m4", "day": "Tue", "teams": "RR vs LSG", "plus": "", "minus": "" },
+                    { "id": "w8m5", "day": "Wed", "teams": "KKR vs MI", "plus": "", "minus": "" },
+                    { "id": "w8m6", "day": "Thu", "teams": "CSK vs GT", "plus": "", "minus": "" },
+                    { "id": "w8m7", "day": "Fri", "teams": "SRH vs RCB", "plus": "", "minus": "" },
+                    { "id": "w8m8", "day": "Sat", "teams": "LSG vs PBKS", "plus": "", "minus": "" },
+                    { "id": "w8m9", "day": "Sun", "teams": "MI vs RR", "plus": "", "minus": "" },
+                    { "id": "w8m10", "day": "Sun", "teams": "KKR vs DC", "plus": "", "minus": "" }
                 ]
             }
         ];
@@ -90,10 +180,17 @@
         let currentWeek = "";
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Load saved data or use default
-            const savedData = localStorage.getItem('iplKhataData');
+            // Yahan memory key iplKhataData_v2 kar di hai taaki fresh load ho
+            const savedData = localStorage.getItem('iplKhataData_v2');
+            
             if (savedData) {
                 appData = JSON.parse(savedData);
+                const existingWeeks = appData.map(w => w.week);
+                defaultSchedule.forEach(dw => {
+                    if(!existingWeeks.includes(dw.week)) {
+                        appData.push(dw);
+                    }
+                });
             } else {
                 appData = defaultSchedule;
             }
@@ -110,7 +207,7 @@
             renderBoard(currentWeek);
 
             weekSelector.addEventListener('change', (e) => {
-                saveDataLocally(); // Auto-save current view before switching
+                saveDataLocally(); 
                 currentWeek = e.target.value;
                 renderBoard(currentWeek);
             });
@@ -130,7 +227,7 @@
 
                     card.innerHTML = `
                         <div class="match-header">
-                            <span>📅 ${match.day}</span>
+                            <span>📅 Match Day: ${match.day}</span>
                         </div>
                         <div class="match-teams">${match.teams}</div>
                         
@@ -148,7 +245,6 @@
             }
         }
 
-        // Save data to JavaScript array locally
         function saveDataLocally() {
             const weekData = appData.find(w => w.week === currentWeek);
             if(weekData) {
@@ -162,17 +258,16 @@
             }
         }
 
-        // Save completely to Local Storage and show notification
         function saveData() {
             saveDataLocally();
-            localStorage.setItem('iplKhataData', JSON.stringify(appData));
+            localStorage.setItem('iplKhataData_v2', JSON.stringify(appData));
             showToast();
         }
 
         function showToast() {
             const toast = document.getElementById("toast");
             toast.className = "toast show";
-            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 2500);
         }
     </script>
 </body>
