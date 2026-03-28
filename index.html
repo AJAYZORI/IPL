@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPL 2026 Tracker & Ledger</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f4f7f6; color: #333; padding-bottom: 50px; }
+        header { background-color: #1a237e; color: white; padding: 15px; text-align: center; }
+        .controls { margin-top: 10px; }
+        select { padding: 8px; font-size: 16px; border-radius: 5px; font-weight: bold; width: 90%; max-width: 300px; }
+        
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        
+        /* Vertical Match Cards */
+        .match-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #ffab00; }
+        .match-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; color: #1a237e; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+        .match-teams { font-size: 18px; margin-bottom: 10px; }
+        
+        /* Inputs for +/- */
+        .input-group { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
+        .input-group label { width: 60px; font-weight: bold; font-size: 14px;}
+        input[type="number"], input[type="text"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; }
+        
+        /* Ledger Section */
+        .ledger-section { background: #e8eaf6; padding: 15px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid #c5cae9; }
+        .ledger-section h3 { color: #1a237e; margin-bottom: 10px; }
+        textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; margin-bottom: 10px; }
+        
+        button { background-color: #ffab00; color: #000; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-top: 10px;}
+        button:hover { background-color: #ff8f00; }
+        
+        .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 2px; padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px; transform: translateX(-50%); }
+        .toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2>🏏 IPL 2026 Hisaab</h2>
+        <div class="controls">
+            <select id="week-selector"></select>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="matches-container"></div>
+
+        <div class="ledger-section">
+            <h3>📝 Week-wise Ledger (Kisko Kitna Dena Hai)</h3>
+            <p style="font-size: 13px; color: #555; margin-bottom: 8px;">Write down final settlement details for this week (e.g., A owes B ₹500)</p>
+            <textarea id="week-ledger" placeholder="Enter settlement details here..."></textarea>
+        </div>
+
+        <button onclick="saveData()">💾 Save All Updates</button>
+    </div>
+
+    <div id="toast" class="toast">Data Saved Successfully!</div>
+
+    <script>
+        // Default Template if no data exists in local storage
+        const defaultSchedule = [
+            {
+                "week": "Week 1 (Mar 28 – Apr 4)",
+                "ledger": "",
+                "matches": [
+                    { "id": "w1m1", "day": "Sat (Mar 28)", "teams": "RCB vs SRH", "plus": "", "minus": "" },
+                    { "id": "w1m2", "day": "Sun (Mar 29)", "teams": "MI vs KKR", "plus": "", "minus": "" },
+                    { "id": "w1m3", "day": "Mon (Mar 30)", "teams": "RR vs CSK", "plus": "", "minus": "" },
+                    { "id": "w1m4", "day": "Tue (Mar 31)", "teams": "PBKS vs GT", "plus": "", "minus": "" },
+                    { "id": "w1m5", "day": "Wed (Apr 1)", "teams": "LSG vs DC", "plus": "", "minus": "" }
+                ]
+            },
+            {
+                "week": "Week 2 (Apr 5 – Apr 11)",
+                "ledger": "",
+                "matches": [
+                    { "id": "w2m1", "day": "Sun", "teams": "SRH vs LSG", "plus": "", "minus": "" },
+                    { "id": "w2m2", "day": "Sun", "teams": "RCB vs CSK", "plus": "", "minus": "" },
+                    { "id": "w2m3", "day": "Mon", "teams": "KKR vs PBKS", "plus": "", "minus": "" },
+                    { "id": "w2m4", "day": "Tue", "teams": "RR vs MI", "plus": "", "minus": "" }
+                ]
+            }
+        ];
+
+        let appData = [];
+        let currentWeek = "";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load saved data or use default
+            const savedData = localStorage.getItem('iplKhataData');
+            if (savedData) {
+                appData = JSON.parse(savedData);
+            } else {
+                appData = defaultSchedule;
+            }
+
+            const weekSelector = document.getElementById('week-selector');
+            appData.forEach(weekData => {
+                const option = document.createElement('option');
+                option.value = weekData.week;
+                option.textContent = weekData.week;
+                weekSelector.appendChild(option);
+            });
+
+            currentWeek = appData[0].week;
+            renderBoard(currentWeek);
+
+            weekSelector.addEventListener('change', (e) => {
+                saveDataLocally(); // Auto-save current view before switching
+                currentWeek = e.target.value;
+                renderBoard(currentWeek);
+            });
+        });
+
+        function renderBoard(selectedWeekName) {
+            const container = document.getElementById('matches-container');
+            container.innerHTML = ''; 
+            
+            const weekData = appData.find(w => w.week === selectedWeekName);
+            document.getElementById('week-ledger').value = weekData.ledger || "";
+
+            if (weekData) {
+                weekData.matches.forEach(match => {
+                    const card = document.createElement('div');
+                    card.className = 'match-card';
+
+                    card.innerHTML = `
+                        <div class="match-header">
+                            <span>📅 ${match.day}</span>
+                        </div>
+                        <div class="match-teams">${match.teams}</div>
+                        
+                        <div class="input-group">
+                            <label>Plus (+)</label>
+                            <input type="text" id="${match.id}-plus" value="${match.plus}" placeholder="E.g. A +50">
+                        </div>
+                        <div class="input-group">
+                            <label>Minus (-)</label>
+                            <input type="text" id="${match.id}-minus" value="${match.minus}" placeholder="E.g. N -50">
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        // Save data to JavaScript array locally
+        function saveDataLocally() {
+            const weekData = appData.find(w => w.week === currentWeek);
+            if(weekData) {
+                weekData.ledger = document.getElementById('week-ledger').value;
+                weekData.matches.forEach(match => {
+                    const plusInput = document.getElementById(`${match.id}-plus`);
+                    const minusInput = document.getElementById(`${match.id}-minus`);
+                    if(plusInput) match.plus = plusInput.value;
+                    if(minusInput) match.minus = minusInput.value;
+                });
+            }
+        }
+
+        // Save completely to Local Storage and show notification
+        function saveData() {
+            saveDataLocally();
+            localStorage.setItem('iplKhataData', JSON.stringify(appData));
+            showToast();
+        }
+
+        function showToast() {
+            const toast = document.getElementById("toast");
+            toast.className = "toast show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+    </script>
+</body>
+</html>
